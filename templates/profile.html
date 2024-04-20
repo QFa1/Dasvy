@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block content %}
+{% if current_user.is_authenticated %}
+<div class="card mb-3" style="max-width: 80%; margin-left:auto; margin-right:auto;">
+  <div class="row g-0">
+    <div class="col-md-4">
+      <img src="{{profileImg}}" class="img-fluid rounded-start img-thumbnail" alt="Аватарка">
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h4 class="card-title"><small style="color: grey;">ФИО:</small> {{ current_user.name }} {{ current_user.surname }}</h4>
+        <h4 class="card-text"><small style="color: grey;">Почта:</small> {{ user.email }}</h4>
+        <h4 class="card-text"><small style="color: grey;">Телефон:</small>
+          {% if user.contact_phone != None %}
+            +{{ user.contact_phone }}
+          {% else %}
+            <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal">Добавить контактный номер телефона</button>
+          {% endif %}
+        </h4>
+        <h4 class="card-text"><small style="color: grey;">Аккаунт создан</small> {{ convert_datetime(user.modified_date) }} г.</h4>
+
+        <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#exampleModal">Редактировать профиль</button>
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Редактирование профиля</h1>
+                <button type="button" data-bs-dismiss="modal" aria-label="Close" style="background: transparent;border: none !important;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                  </svg>
+                </button>
+              </div>
+              <form action="" method="post" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                <div class="modal-body">
+                  <div class="input-group">
+                    <span class="input-group-text">ФИО</span>
+                    {{ form.surname(class="form-control", placeholder="Фамилия", value=user.surname) }}<br>
+                    {% for error in form.surname.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                    {{ form.name(class="form-control", placeholder="Имя", value=user.name) }}<br>
+                    {% for error in form.name.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                    {% if user.patronymic != None %}
+                      {{ form.patronymic(class="form-control", placeholder="Отчество", value=user.patronymic) }}<br>
+                    {% else %}
+                      {{ form.patronymic(class="form-control", placeholder="Отчество") }}<br>
+                    {% endif %}
+                    {% for error in form.patronymic.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                  </div>
+                  <br>
+                  <div class="flexd">
+                      {{ form.email.label }}
+                      {{ form.email(class="form-control", type="email", value=user.email, readonly=True) }}
+                  </div>
+                  <br>
+                  <div class="flexd">
+                      {{ form.phone_number.label }}
+                      {% if user.contact_phone != None %}
+                          {{ form.phone_number(class="form-control", type="tel", placeholder="+7 123 456-78-90", value='+' + user.contact_phone|string) }}
+                      {% else %}
+                          {{ form.phone_number(class="form-control", type="tel", placeholder="+7 123 456-78-90") }}
+                      {% endif %}
+                      {% for error in form.phone_number.errors %}
+                          <p class="alert alert-danger" role="alert">
+                              {{ error }}
+                          </p>
+                      {% endfor %}
+                  </div>
+                    {% if message %}
+                        <br>
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <svg xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle" viewBox="0 0 16 16">
+                              <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"/>
+                              <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                            </svg>
+                            <div>
+                                <big>Неправильный формат телефона</big>
+                            </div>
+                        </div>
+                    {% endif %}
+                  {% if user.address != None %}
+                      {% set address = user.address.split() %}
+                      <center><h3>Адрес</h3></center>
+                  {% else %}
+                      {% set address = ['', '', ''] %}
+                      <center><h3>Добавить адрес</h3></center>
+                  {% endif %}
+                  <div class="input-group">
+                    <span class="input-group-text">Район/Улица/Дом/Квартира</span>
+					{{ form.district(class="form-control", type="text", value=address[0], placeholder="Район") }}
+					{% for error in form.district.errors %}
+						<p class="alert alert-danger" role="alert">
+							{{ error }}
+						</p>
+					{% endfor %}
+                      {{ form.street(class="form-control", type="text", value=address[1], placeholder="Улица") }}
+                      {% for error in form.street.errors %}
+                          <p class="alert alert-danger" role="alert">
+                              {{ error }}
+                          </p>
+                      {% endfor %}
+                      {{ form.home(class="form-control", type="text", value=address[2], placeholder="Дом") }}
+                      {% for error in form.home.errors %}
+                          <p class="alert alert-danger" role="alert">
+                              {{ error }}
+                          </p>
+                      {% endfor %}
+                      {% if user.flat != None %}
+                          {{ form.flat(class="form-control", type="text", value=user.flat, placeholder="Квартира") }}
+                      {% else %}
+                          {{ form.flat(class="form-control", type="text", placeholder="Квартира") }}
+                      {% endif %}
+                      {% for error in form.flat.errors %}
+                          <p class="alert alert-danger" role="alert">
+                              {{ error }}
+                          </p>
+                      {% endfor %}
+                  </div>
+                  <br>
+                  <div class="input-group mb-3">
+                      {{ form.profile_photo.label(class="btn btn-outline-info") }}
+                      {{ form.profile_photo(class="form-control", style="display:none;") }}<br>
+                      {% for error in form.profile_photo.errors %}
+                      <div class="alert alert-danger" role="alert">
+                          {{ error }}
+                      </div>
+                      {% endfor %}
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                  {{ form.submit(type="submit", class="btn btn-primary") }}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#exampleModal2">
+          Выйти из аккаунта
+        </button>
+        <!-- Modal2 -->
+        <div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel2">Вы точно хотите выйти с аккаунта?</h1>
+                <button type="button" data-bs-dismiss="modal" aria-label="Close" style="background: transparent;border: none !important;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="modal-body">
+                <center>
+                  <div class="btn-group btn-group-lg" role="group" aria-label="Large button group">
+                    <button type="button" style="width: 10rem;" class="btn btn-success" data-bs-dismiss="modal">Нет</button>
+                    <button type="button" style="width: 10rem;" class="btn btn-danger" onclick="location.href='/logout';">Да</button>
+                  </div>
+                </center>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<br>
+<center>
+  <div class="btn-group btn-group-lg" role="group" aria-label="Basic outlined example">
+    <button type="button" onclick="location.href='/view_basket';" class="btn btn-outline-primary" style="width: 33.33%;">Моя корзина</button>
+    <button type="button" onclick="location.href='/purchased';" class="btn btn-outline-primary" style="width: 33.33%;">Купленные товары</button>
+    <button type="button" onclick="location.href='/my_orders';" class="btn btn-outline-primary" style="width: 33.33%;">Мои заказы</button>
+  </div>
+</center>
+<br>
+{% else %}
+<div class="notfound">
+  <h2>Кажется, вы не зарегистрированы</h2>
+  <svg width="70px" height="70px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="notfound">
+    <path d="M10.5 15L13.5 12M13.5 15L10.5 12" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M22 11.7979C22 9.16554 22 7.84935 21.2305 6.99383C21.1598 6.91514 21.0849 6.84024 21.0062 6.76946C20.1506 6 18.8345 6 16.2021 6H15.8284C14.6747 6 14.0979 6 13.5604 5.84678C13.2651 5.7626 12.9804 5.64471 12.7121 5.49543C12.2237 5.22367 11.8158 4.81578 11 4L10.4497 3.44975C10.1763 3.17633 10.0396 3.03961 9.89594 2.92051C9.27652 2.40704 8.51665 2.09229 7.71557 2.01738C7.52976 2 7.33642 2 6.94975 2C6.06722 2 5.62595 2 5.25839 2.06935C3.64031 2.37464 2.37464 3.64031 2.06935 5.25839C2 5.62595 2 6.06722 2 6.94975M21.9913 16C21.9554 18.4796 21.7715 19.8853 20.8284 20.8284C19.6569 22 17.7712 22 14 22H10C6.22876 22 4.34315 22 3.17157 20.8284C2 19.6569 2 17.7712 2 14V11" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>
+</div>
+<div class="notfound">
+  <div class="d-grid gap-2 col-6 mx-auto">
+    <a style="min-width: 220px;" class="btn btn-info btn-lg" href="/register">Зарегистрироваться</a>
+    <a style="min-width: 220px;" class="btn btn-primary btn-lg" href="/login">Войти</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

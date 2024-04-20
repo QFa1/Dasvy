@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+	<h2 align="center">Ваш заказ</h2>
+	<div class="container">
+		{% set prod_sum = [] %}
+		{% set prod_sum2 = [] %}
+		{% if where == "basket" %}
+			{% for item in basket.products %}
+				<div class="alert alert-secondary mini-basket" role="alert" onclick="location.href='/product/{{item.id}}';">
+					<img src="{{ item.image_path }}" class="rounded">
+					{% set c = prod_sum.append(item.discount) %}
+					{% set c = prod_sum2.append(item.price) %}
+					<h6>{{ item.name }}</h6>
+					<h4 class="card-title pricing-card-title" style="color: #00cc00; max-width: 20%;"> {{ "{:,}".format(item.discount).replace(',', ' ') }} ₽ <small style="color: grey; font-size: 16px;"><s>{{ "{:,}".format(item.price).replace(',', ' ') }} ₽</s></small> </h4>
+					<a type="button" style="max-width: 5%;" class="btn btn-outline-danger" href="/delete_item_from_basket/{{item.id}}/1">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+						  <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+						</svg>
+					</a>
+				</div>
+			{% endfor %}
+		{% else %}
+			<div class="alert alert-secondary mini-basket" role="alert" onclick="location.href='/product/{{ basket.id }}';">
+				<img src="{{ basket.image_path }}" class="rounded">
+				{% set c = prod_sum.append(basket.discount) %}
+				{% set c = prod_sum2.append(basket.price) %}
+				<h6>{{ basket.name }}</h6>
+				<h4 class="card-title pricing-card-title" style="color: #00cc00; max-width: 20%;">{{ "{:,}".format(basket.discount).replace(',', ' ') }} ₽ <small style="color: grey; font-size: 16px;"><s>{{ "{:,}".format(basket.price).replace(',', ' ') }} ₽</s></small></h4>
+				<a type="button" style="max-width: 5%;" class="btn btn-outline-danger" href="/delete_item_from_basket/{{ basket.id }}/1">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+						<path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+					</svg>
+				</a>
+			</div>
+		{% endif %}
+		<div class="alert alert-dark" role="alert" style="min-width: 25%; background: #f5f5f5; height: 100%;">
+			<div class="flexd" style="justify-content: space-between;">
+				<p>Товары ({{ prod_sum|length }})</p>
+				<b>{{ "{:,}".format(prod_sum2|sum()).replace(',', ' ') }} ₽</b>
+			</div>
+			<div class="flexd" style="justify-content: space-between;">
+				<p>Скидка</p>
+				<b style="color: red;">-{{ "{:,}".format(prod_sum2|sum() - prod_sum|sum()).replace(',', ' ') }} ₽</b>
+			</div>
+			<hr>
+			<div class="flexd" style="justify-content: space-between;">
+				<h4><b>Итого:</b></h4>
+				<h4><b style="color: #00cc00;">{{ "{:,}".format(prod_sum|sum()).replace(',', ' ') }} ₽</b></h4>
+			</div>
+		</div>
+	</div>
+	<hr>
+	<h3 align="center">Контакты</h3>
+	<br>
+	<div>
+		<form action="" method="post">
+			{{ form.hidden_tag() }}
+			<div class="flexd">
+				{{ form.full_name.label }}
+				{{ form.full_name(class="form-control", type="text", value=user.surname + ' ' + user.name, placeholder="ФИО") }}
+				{% for error in form.full_name.errors %}
+					<p class="alert alert-danger" role="alert">
+						{{ error }}
+					</p>
+				{% endfor %}
+			</div>
+			<br>
+			<div class="flexd">
+				{{ form.phone_number.label }}
+				{% if user.contact_phone != None %}
+					{{ form.phone_number(class="form-control", type="tel", placeholder="+7 123 456-78-90", value='+' + user.contact_phone|string) }}
+				{% else %}
+					{{ form.phone_number(class="form-control", type="tel", placeholder="+7 123 456-78-90") }}
+				{% endif %}
+				{% for error in form.phone_number.errors %}
+					<p class="alert alert-danger" role="alert">
+						{{ error }}
+					</p>
+				{% endfor %}
+			</div>
+			{% if message %}
+				<br>
+				<div class="alert alert-danger d-flex align-items-center" role="alert">
+					<svg xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle" viewBox="0 0 16 16">
+					  <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"/>
+					  <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+					</svg>
+					<div>
+						<big>Неправильный формат телефона</big>
+					</div>
+				</div>
+			{% endif %}
+			<br>
+			<div>
+				<center><h5>Адрес</h5></center>
+				<center><small><b>На данный момент доставка только по Казани</b></small></center>
+				<br>
+				{% if user.address != None %}
+					{% set address = user.address.split() %}
+				{% else %}
+					{% set address = ['', '', ''] %}
+				{% endif %}
+				<div class="flexd">
+					{{ form.district.label }}
+					{{ form.district(class="form-control", type="text", list="district", value=address[0]) }}
+					<datalist id="district">
+						<option value="Вахитовский">
+						<option value="Приволжский">
+						<option value="Советский">
+						<option value="Ново-Савиновский">
+						<option value="Кировский">
+						<option value="Авиастроительный">
+						<option value="Московский">
+					</datalist>
+					{% for error in form.district.errors %}
+						<p class="alert alert-danger" role="alert">
+							{{ error }}
+						</p>
+					{% endfor %}
+				</div>
+				<br>
+				<div class="flexd">
+					{{ form.street.label }}
+					{{ form.street(class="form-control", type="text", value=address[1]) }}
+					{% for error in form.street.errors %}
+						<p class="alert alert-danger" role="alert">
+							{{ error }}
+						</p>
+					{% endfor %}
+				</div>
+				<br>
+				<div class="flexd">
+					{{ form.home.label }}
+					{{ form.home(class="form-control", type="text", value=address[2]) }}
+					{% for error in form.home.errors %}
+						<p class="alert alert-danger" role="alert">
+							{{ error }}
+						</p>
+					{% endfor %}
+				</div>
+				<br>
+				<div class="flexd">
+					{{ form.flat.label }}
+					{% if user.flat != None %}
+						{{ form.flat(class="form-control", type="text", value=user.flat) }}
+					{% else %}
+						{{ form.flat(class="form-control", type="text") }}
+					{% endif %}
+					{% for error in form.flat.errors %}
+						<p class="alert alert-danger" role="alert">
+							{{ error }}
+						</p>
+					{% endfor %}
+				</div>
+			</div>
+			<br>
+			<center><h5>Комментарий</h5></center>
+			<div>
+				{{ form.comment.label }}
+				{{ form.comment(class="form-control", type="text", placeholder="Комментарий") }}
+			</div>
+			<br>
+			<p>{{ form.submit(type="submit", class="btn btn-outline-success") }}</p>
+		</form>
+	</div>
+</div>
+{% endblock %}

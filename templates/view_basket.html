@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+{% if basket.products|length != 0 %}
+<div style="display: flex;">
+	<div class="container">
+		<div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+			{% set prod_sum = [] %}
+			{% set prod_sum2 = [] %}
+			{% for item in basket.products %}
+				<div class="col" onclick="location.href='/product/{{item.id}}';">
+				  <div class="card mb-4 shadow-sm"  style="text-align: left;">
+					  <img src="{{ item.image_path }}" class="card-img-top">
+					  <div class="card-body">
+						  {% set c = prod_sum.append(item.discount) %}
+						  {% set c = prod_sum2.append(item.price) %}
+						  <h4 class="card-title pricing-card-title" style="color: #00cc00;" > {{"{:,}".format(item.discount).replace(',', ' ') }} ₽ <small style="color: grey; font-size: 16px;"><s>{{ "{:,}".format(item.price).replace(',', ' ') }} ₽</s></small> </h4>
+						  <p class="card-text ellipsis">{{item.name}}</p>
+						{% if current_user.is_authenticated %}
+							<a type="button" class="btn btn-lg btn-block btn-danger" href="/delete_item_from_basket/{{item.id}}/0">Удалить из корзины</a>
+							<a type="button" class="btn btn-lg btn-block btn-danger" href="/book/{{item.id}}">Выкупить</a>
+						{% endif %}
+					  </div>
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+	<div class="alert alert-dark" role="alert" style="min-width: 25%; background: #fff; height: 100%;">
+		<a href="/buyprod/basket/0" type="button" class="btn btn-success" style="background:rgba(16, 196, 76, 1);color:#ffffff;width:100%;">
+			Перейти к оформлению
+		</a>
+		<hr>
+		<center><h4>Ваша корзина</h4></center>
+		<div style="display: flex; justify-content: space-between;">
+			<p>Товары ({{ prod_sum|length }})</p>
+			<b>{{ "{:,}".format(prod_sum2|sum()).replace(',', ' ') }} ₽</b>
+		</div>
+		<div style="display: flex; justify-content: space-between;">
+			<p>Скидка</p>
+			<b style="color: red;">-{{ "{:,}".format(prod_sum2|sum() - prod_sum|sum()).replace(',', ' ') }} ₽</b>
+		</div>
+		<hr>
+		<div style="display: flex; justify-content: space-between;">
+			<h4><b>Итого:</b></h4>
+			<h4><b style="color: #00cc00;">{{ "{:,}".format(prod_sum|sum()).replace(',', ' ') }} ₽</b></h4>
+		</div>
+	</div>
+</div>
+{% else %}
+<div class="notfound">
+    <h1>В корзине пока нет товаров</h1>
+</div>
+<div class="notfound">
+    <p style="color: grey;">Начните с подборок на главной странице или найдите нужный товар через поиск</p>
+</div>
+<div class="notfound">
+    <a href="/" type="button" class="btn btn-outline-danger btn-lg">На главную</a>
+</div>
+{% endif %}
+{% endblock %}

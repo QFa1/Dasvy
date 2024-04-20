@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block content %}
+{% if where == 0 %}
+	<center>
+		<a type="button" href="/orders/1" class="btn btn-success btn-lg">Перейти к заказам, которые надо доставить
+			<span class="badge text-bg-secondary" style="background: red;">
+				{{ all_ords }}
+		  	</span>
+		</a>
+		<a type="button" href="/orders/2" class="btn btn-danger btn-lg">Перейти к завершённым заказам</a>
+		<a type="button" href="/orders/3" class="btn btn-secondary btn-lg">Не до конца заполненные формы заказов</a>
+		<a type="button" href="/orders/4" class="btn btn-secondary btn-lg">Перейти к принятым заказам</a>
+	</center>
+{% elif where ==  1 %}
+	<center><a type="button" href="/orders/0" class="btn btn-info btn-lg">Назад
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
+		  <path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
+		</svg>
+	</a></center>
+	<center><h1>Заказы, которые надо доставить</h1></center>
+	{% for order in orders %}
+		{% if order.is_ordered == True %}
+			<div class="alert alert-secondary black-hr" style="background: #bde0ff;" role="alert">
+				<div class="cool">
+					<p>
+						<big><b>Заказ номер {{ order.id }}</b></big>
+						на сумму <big style="color: #00cc00;">{{ "{:,}".format(order.amount).replace(',', ' ') }} ₽</big>
+					</p>
+					<p>
+						<big><b>Заказан {{ convert_datetime(order.order_date) }} г.</b></big>
+					</p>
+				</div>
+				<hr>
+				<p>ФИО заказчика: <big><u>{{ order.full_name }}</u></big></p>
+				<p>Контактный телефон: <big>+{{ order.user.contact_phone }}</big></p>
+				<a href="/profile_user/{{ order.user_id }}">Посмотреть профиль заказчика</a>
+				<p>
+					Доставить на адрес:
+					<big><u>
+						{% set address = order.user.address.split() %}
+						Казань, <b>{{ address[0] }}</b> район, ул. <b>{{ address[1] }}</b>, дом <b>{{ address[2] }}</b>
+						{% if order.user.flat != '' %}
+							<b>{{ order.user.flat }}</b> кв.
+						{% endif %}
+					</u></big>
+				</p>
+				<p>Комментарии к заказу: <b><u>{{ order.comment }}</u></b></p>
+				<hr>
+				<h4>Продукты:</h4>
+				{% for item in order.product_ides.split(';')[:-1] %}
+					<a type="button" href="/product/{{ item }}" class="btn btn-primary btn-sm">Перейти к продукту {{ item }}</a>
+				{% endfor %}
+				<hr>
+				<p>Оплата:
+					{% if order.payment == 'cash' %}
+						<big><b>Наличными</b></big>
+					{% else %}
+						<big><b>Картой</b></big>
+					{% endif %}
+				</p>
+				<hr>
+				{% if order.who_ordered == None %}
+					<a type="button" href="/take_order/{{ order.id }}" class="btn btn-danger">Взять заказ</a>
+				{% else %}
+					<div style="display: flex; justify-content: space-between;">
+						<p><big><b>Заказ принят <a href="/profile_user/{{ order.take_order_id }}">{{ order.who_ordered }}</a></b></big></p>
+						{% if current_user.id == order.take_order_id %}
+							<a type="button" href="/not_take_order/{{ order.id }}" class="btn btn-danger btn-sm">Отменить заказ</a>
+						{% endif %}
+					</div>
+				{% endif %}
+			</div>
+		{% endif %}
+	{% endfor %}
+{% elif where ==  2 %}
+	<center><a type="button" href="/orders/0" class="btn btn-info btn-lg">Назад
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
+		  <path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
+		</svg>
+	</a></center>
+	<center><h1>Завершённые заказы</h1></center>
+	{% for order in orders %}
+		{% if order.is_ordered == False and order.payment != None %}
+			<div class="alert alert-secondary black-hr" style="background: #bde0ff;" role="alert">
+				<div class="cool">
+					<p>
+						<big><b>Заказ номер {{ order.id }}</b></big>
+						на сумму <big style="color: #00cc00;">{{ "{:,}".format(order.amount).replace(',', ' ') }} ₽</big>
+					</p>
+					<p>
+						<big><b>Заказан {{ convert_datetime(order.order_date) }} г.</b></big>
+					</p>
+				</div>
+				<hr>
+				<p>ФИО заказчика: <big><u>{{ order.full_name }}</u></big></p>
+				<p>Контактный телефон: <big>+{{ order.user.contact_phone }}</big></p>
+				<a href="/profile_user/{{ order.user_id }}">Посмотреть профиль заказчика</a>
+				<p>
+					Доставить на адрес:
+					<big><u>
+						{% set address = order.user.address.split() %}
+						Казань, <b>{{ address[0] }}</b> район, ул. <b>{{ address[1] }}</b>, дом <b>{{ address[2] }}</b>
+						{% if order.user.flat != '' %}
+							<b>{{ order.user.flat }}</b> кв.
+						{% endif %}
+					</u></big>
+				</p>
+				<p>Комментарии к заказу: <b><u>{{ order.comment }}</u></b></p>
+				<hr>
+				<h4>Продукты:</h4>
+				{% for item in order.product_ides.split(';')[:-1] %}
+					<a type="button" href="/product/{{ item }}" class="btn btn-primary btn-sm">Перейти к продукту {{ item }}</a>
+				{% endfor %}
+				<hr>
+				<p>Оплата:
+					{% if order.payment == 'cash' %}
+						<big><b>Наличными</b></big>
+					{% else %}
+						<big><b>Картой</b></big>
+					{% endif %}
+				</p>
+			</div>
+		{% endif %}
+	{% endfor %}
+{% elif where ==  3 %}
+	<center><a type="button" href="/orders/0" class="btn btn-info btn-lg">Назад
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
+		  <path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
+		</svg>
+	</a></center>
+	<center><h1>Не до конца заполненные формы заказов</h1></center>
+	{% for order in orders %}
+		{% if order.is_ordered == None %}
+			<div class="alert alert-secondary black-hr" style="background: #bde0ff;" role="alert">
+				<div class="cool">
+					<p>
+						<big><b>Заказ номер {{ order.id }}</b></big>
+						на сумму <big style="color: #00cc00;">{{ "{:,}".format(order.amount).replace(',', ' ') }} ₽</big>
+					</p>
+					<p>
+						<big><b>Заказан {{ convert_datetime(order.order_date) }} г.</b></big>
+					</p>
+				</div>
+				<hr>
+				<p>ФИО заказчика: <big><u>{{ order.full_name }}</u></big></p>
+				<p>Контактный телефон: <big>+{{ order.user.contact_phone }}</big></p>
+				<a href="/profile_user/{{ order.user_id }}">Посмотреть профиль заказчика</a>
+				<p>
+					Доставить на адрес:
+					<big><u>
+						{% set address = order.user.address.split() %}
+						Казань, <b>{{ address[0] }}</b> район, ул. <b>{{ address[1] }}</b>, дом <b>{{ address[2] }}</b>
+						{% if order.user.flat != '' %}
+							<b>{{ order.user.flat }}</b> кв.
+						{% endif %}
+					</u></big>
+				</p>
+				<p>Комментарии к заказу: <b><u>{{ order.comment }}</u></b></p>
+				<hr>
+				<h4>Продукты:</h4>
+				{% for item in order.product_ides.split(';')[:-1] %}
+					<a type="button" href="/product/{{ item }}" class="btn btn-primary btn-sm">Перейти к продукту {{ item }}</a>
+				{% endfor %}
+				<hr>
+				<p>Оплата:
+					{% if order.payment == 'cash' %}
+						<big><b>Наличными</b></big>
+					{% else %}
+						<big><b>None</b></big>
+					{% endif %}
+				</p>
+			</div>
+		{% endif %}
+	{% endfor %}
+{% elif where ==  4 %}
+	<center><a type="button" href="/orders/0" class="btn btn-info btn-lg">Назад
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
+		  <path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
+		</svg>
+	</a></center>
+	<center><h1>Ваши принятые заказы</h1></center>
+	{% for order in orders %}
+		{% if order.take_order_id == current_user.id %}
+			<div class="alert alert-secondary black-hr" style="background: #bde0ff;" role="alert">
+				<div class="cool">
+					<p>
+						<big><b>Заказ номер {{ order.id }} {% if order.is_ordered == False %}ВЫПОЛНЕН{% endif %}</b></big>
+						на сумму <big style="color: #00cc00;">{{ "{:,}".format(order.amount).replace(',', ' ') }} ₽</big>
+					</p>
+					<p>
+						{% set date = (order.order_date|string).split()[1].split(':') %}
+						<big>Заказан в <b>{{ date[0] }}:{{ date[1] }} {{ convert_datetime(order.order_date) }} г.</b></big>
+					</p>
+				</div>
+				<hr>
+				<p>ФИО заказчика: <big><u>{{ order.full_name }}</u></big></p>
+				<p>Контактный телефон: <big>+{{ order.user.contact_phone }}</big></p>
+				<a href="/profile_user/{{ order.user_id }}">Посмотреть профиль заказчика</a>
+				<p>
+					Доставить на адрес:
+					<big><u>
+						{% set address = order.user.address.split() %}
+						Казань, <b>{{ address[0] }}</b> район, ул. <b>{{ address[1] }}</b>, дом <b>{{ address[2] }}</b>
+						{% if order.user.flat != '' %}
+							<b>{{ order.user.flat }}</b> кв.
+						{% endif %}
+					</u></big>
+				</p>
+				<p>Комментарии к заказу: <b><u>{{ order.comment }}</u></b></p>
+				<hr>
+				<h4>Продукты:</h4>
+				{% for item in order.product_ides.split(';')[:-1] %}
+					<a type="button" href="/product/{{ item }}" class="btn btn-primary btn-sm">Перейти к продукту {{ item }}</a>
+				{% endfor %}
+				<hr>
+				<p>Оплата:
+					{% if order.payment == 'cash' %}
+						<big><b>Наличными</b></big>
+					{% else %}
+						<big><b>Картой</b></big>
+					{% endif %}
+					{% if order.is_paid == False %}
+						<em>Заказ не оплачен</em>
+					{% elif order.is_paid == True %}
+						<em>Заказ оплачен</em>
+					{% endif %}
+				</p>
+				<hr>
+				{% if order.who_ordered == None %}
+					<a type="button" href="/take_order/{{ order.id }}" class="btn btn-danger">Взять заказ</a>
+				{% else %}
+					<div style="display: flex; justify-content: space-between;">
+						<p><big><b>Заказ принят Вами</b></big></p>
+						{% if current_user.id == order.take_order_id %}
+							<a type="button" href="/not_take_order/{{ order.id }}" class="btn btn-danger btn-sm">Отменить заказ</a>
+						{% endif %}
+					</div>
+				{% endif %}
+				<hr>
+				<h2>Заказ на стадии "<b>{{ order_stage(order.stage) }}</b>"</h2>
+				<div class="dropdown">
+				  <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+					Изменить стадию заказа
+				  </button>
+				  <ul class="dropdown-menu">
+					<li><a class="dropdown-item" href="/change_stage/0/{{ order.id }}">Собираем заказ</a></li>
+					<li><a class="dropdown-item" href="/change_stage/1/{{ order.id }}">Подготовлен к отгрузке</a></li>
+					<li><a class="dropdown-item" href="/change_stage/2/{{ order.id }}">В пути</a></li>
+					<li><a class="dropdown-item" href="/change_stage/3/{{ order.id }}">Курьер направляется к вам</a></li>
+					<li><a class="dropdown-item" href="/change_stage/4/{{ order.id }}">Заказ доставлен</a></li>
+				  </ul>
+				</div>
+				{% if order.stage == 4 %}
+					<a type="button" href="/order_complete/{{ order.id }}" class="btn btn-success">Подтвердить заказ выполненным</a>
+				{% endif %}
+			</div>
+		{% endif %}
+	{% endfor %}
+
+{% endif %}
+
+{% endblock %}

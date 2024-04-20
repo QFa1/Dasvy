@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block content %}
+<script type="text/javascript">
+function Show() {
+        obj1=document.getElementById("mydiv1");
+        obj1.style.display="block";
+        obj2=document.getElementById("mydiv2");
+        obj2.style.display="none";
+}
+function Show2() {
+        obj1=document.getElementById("mydiv1");
+        obj1.style.display="none";
+        obj2=document.getElementById("mydiv2");
+        obj2.style.display="block";
+}
+</script>
+<a type="button" href="/profile" class="btn btn-outline-primary btn-lg">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
+    </svg>
+    Назад
+</a>
+{% if orders|length > 0 %}
+  <div>
+    <center>
+      <div class="form_radio_group">
+        <div class="form_radio_group-item">
+          <input id="radio-0" type="radio" name="radio" onclick="document.location='/profile'">
+            <label for="radio-1" onclick="document.location='/profile'"><b>
+              <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
+              </svg>
+              Назад
+            </b></label>
+          </div>
+          <div class="form_radio_group-item">
+              <input id="radio-1" type="radio" name="radio" value="1" onClick="Show();" checked>
+            <label for="radio-1"><b>В пути</b></label>
+          </div>
+          <div class="form_radio_group-item">
+              <input id="radio-2" type="radio" name="radio" value="2" onClick="Show2();">
+              <label for="radio-2"><b>Доставленные</b></label>
+          </div>
+      </div>
+    </center>
+    <div style="display: block;" id="mydiv1">
+      <h1>В пути:</h1>
+      {% for order in orders %}
+        {% if order.is_ordered == True %}
+          <div class="alert alert-dark blue-hr" role="alert" style="background: #f5f5f5;">
+            <div class="cool">
+              <p><big><b>Заказ от {{ convert_datetime(order.order_date) }} г.</b></big></p>
+              <p>
+                {% if order.is_paid == True %}
+                  <em>оплачено</em>
+                {% else %}
+                  <em>не оплачено</em>
+                {% endif %}
+                <big><b>{{ "{:,}".format(order.amount).replace(',', ' ') }} ₽</b></big>
+              </p>
+            </div>
+            <p>Доставка ожидается {{ convert_datetime(order.should_be_delivered) }}</p>
+            <hr>
+            {% for prod_id in order.product_ides.split(';')[:-1] %}
+                {% set item = db_sess.query(Product).filter(Product.id == prod_id).first() %}
+                <div class="alert alert-secondary mini-basket" style="background: #f5f5f5;" role="alert" onclick="location.href='/product/{{item.id}}';">
+                  <img src="{{ item.image_path }}" class="rounded">
+                  <h6>{{ item.name }}</h6>
+                  <h4 class="card-title pricing-card-title" style="color: #00cc00; max-width: 20%;"> {{ "{:,}".format(item.discount).replace(',', ' ') }} ₽ <small style="color: grey; font-size: 16px;"><s>{{ "{:,}".format(item.price).replace(',', ' ') }} ₽</s></small> </h4>
+                  <a type="button" style="max-width: 5%;" class="btn btn-outline-danger" href="/delete_item_from_basket/{{item.id}}/1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                      <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                    </svg>
+                  </a>
+                </div>
+            {% endfor %}
+            <!-- Scrollable modal -->
+            <!-- Button trigger modal -->
+            <center><button type="button" style="min-width: 30%;" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+              Отслеживать заказ
+            </button></center>
+            <!-- Modal -->
+            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Детализация доставки товара</h1>
+                    <button type="button" data-bs-dismiss="modal" aria-label="Close" style="background: transparent;border: none !important;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <center><big><p>Доставка ожидается {{ convert_datetime(order.should_be_delivered) }}</p></big></center>
+                    <div style="max-width: 60%; margin: 0 auto;">
+                      <table class="table">
+                        {% for i in [0, 1, 2, 3, 4] %}
+                          {% if order.stage >= i %}
+                            <tr class="table-info">
+                              <th scope="row">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#1f75fe" class="bi bi-check-circle-fill svg_hover_blue" viewBox="0 0 16 16">
+                                  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                </svg>
+                              </th>
+                              <td><big>{{ order_stage(i) }}</big></td>
+                            </tr>
+                          {% else %}
+                            <tr>
+                              <th scope="row">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="grey" class="bi bi-check-circle-fill svg_hover_black" viewBox="0 0 16 16">
+                                  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                </svg>
+                              </th>
+                              <td><big>{{ order_stage(i) }}</big></td>
+                            </tr>
+                          {% endif %}
+                        {% endfor %}
+                      </table>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Всё ясно</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div style="display: none;" id="mydiv2">
+      <h1>Доставленные:</h1>
+      {% for order in orders %}
+        {% if order.is_ordered == False %}
+          <div class="alert alert-dark blue-hr" role="alert" style="background: #d0e3f7;">
+            <div class="cool">
+              <p><big><b>Заказ от {{ convert_datetime(order.order_date) }} г.</b></big></p>
+              <p>
+                {% if order.is_paid == True %}
+                  <em>оплачено</em>
+                {% else %}
+                  <em>не оплачено</em>
+                {% endif %}
+                <big><b>{{ "{:,}".format(order.amount).replace(',', ' ') }} ₽</b></big>
+              </p>
+            </div>
+            <p>Заказ доставлен {{ convert_datetime(order.should_be_delivered, False) }}</p>
+            <hr>
+            <center><p>
+              <button class="btn btn-info" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                  Содержимое заказа ({{ order.product_ides.split(';')[:-1]|length }})
+              </button>
+            </p></center>
+            <div class="collapse" id="collapseExample">
+              <div class="card card-body" style="background: #f5f5f5;">
+                {% for prod_id in order.product_ides.split(';')[:-1] %}
+                    {% set item = db_sess.query(Product).filter(Product.id == prod_id).first() %}
+                    <div class="alert alert-secondary mini-basket" style="background: #f5f5f5;" role="alert" onclick="location.href='/product/{{item.id}}';">
+                      <img src="{{ item.image_path }}" class="rounded">
+                      <h6>{{ item.name }}</h6>
+                      <h4 class="card-title pricing-card-title" style="color: #00cc00; max-width: 20%;"> {{ "{:,}".format(item.discount).replace(',', ' ') }} ₽ <small style="color: grey; font-size: 16px;"><s>{{ "{:,}".format(item.price).replace(',', ' ') }} ₽</s></small> </h4>
+                      <a type="button" style="max-width: 5%;" class="btn btn-outline-danger" href="/delete_item_from_basket/{{item.id}}/1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                          <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                        </svg>
+                      </a>
+                    </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+{% else %}
+  <div class="notfound"><h1>У вас ещё не было заказов :(</h1></div>
+  <div class="notfound"><big><a href="/">На главную</a> </big></div>
+{% endif %}
+{% endblock %}

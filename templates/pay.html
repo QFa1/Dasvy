@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<center><h2>Оплата</h2></center>
+<div class="d-grid gap-2 col-6 mx-auto">
+    <a type="button" class="btn btn-primary" href="/th/{{ where }}/{{ order_id }}">Наличными</a>
+    <a type="button" class="btn btn-primary" href="">Банк</a>
+</div>
+<input type="button" class="btn btn-outline-info" onclick="history.back();" value="Назад"/>
+{% endblock %}
