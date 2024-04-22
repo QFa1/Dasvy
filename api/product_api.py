@@ -17,14 +17,14 @@ def get_products():
         {
             'prod':
                 [item.to_dict(
-                    only=('id', 'name', 'type', 'price', 'description'))
+                    only=('id', 'name', 'type', 'price', 'discount', 'count', 'description', 'image_path'))
                  for item in prod]
         }
     )
 
 
 @blueprint.route('/api/products/<int:id>', methods=['GET'])
-def get_one_job(id):
+def get_one_product(id):
     db_sess = db_session.create_session()
     prod = db_sess.query(Product).get(id)
     if not prod:
@@ -32,7 +32,7 @@ def get_one_job(id):
     return flask.jsonify(
         {
             'prod': prod.to_dict(only=(
-                'id', 'name', 'type', 'price', 'description'
+                'id', 'name', 'type', 'price', 'discount', 'count', 'description', 'image_path'
             ))
         }
     )

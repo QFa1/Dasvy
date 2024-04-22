@@ -10,21 +10,22 @@ blueprint = flask.Blueprint(
 
 
 @blueprint.route('/api/users')
-def get_products():
+def get_users():
     db_sess = db_session.create_session()
     user = db_sess.query(User).all()
     return flask.jsonify(
         {
             'user':
                 [item.to_dict(
-                    only=('id', 'surname', 'name', 'age', 'email', 'modified_date'))
-                 for item in user]
+                    only=('id', 'surname', 'name', 'patronymic', 'age', 'email', 'modified_date', 'contact_phone',
+                          'address', 'flat', 'photo'))
+                    for item in user]
         }
     )
 
 
 @blueprint.route('/api/users/<int:id>', methods=['GET'])
-def get_one_job(id):
+def get_one_user(id):
     db_sess = db_session.create_session()
     user = db_sess.query(User).get(id)
     if not user:
@@ -32,7 +33,8 @@ def get_one_job(id):
     return flask.jsonify(
         {
             'user': user.to_dict(only=(
-                'id', 'surname', 'name', 'age', 'email', 'modified_date'
+                'id', 'surname', 'name', 'patronymic', 'age', 'email', 'modified_date', 'contact_phone',
+                'address', 'flat', 'photo'
             ))
         }
     )

@@ -83,6 +83,9 @@ body {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
 }
+.about p {
+    text-indent: 35px;
+}
 .flexd label{
     min-width: 16%;
 }
