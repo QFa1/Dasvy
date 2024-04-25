@@ -41,6 +41,7 @@ def cut_image(filename, where_to_save, crop=True) -> Image:
 
 
 def reformat_number(number):
+    # Реформат телефонного номера пользователя
     try:
         string = number.replace('-', '').replace('(', '').replace(')', '').replace(' ', '').replace('+', '')
         if int(string[0]) == 8 or int(string[0]) == 7:
@@ -54,6 +55,7 @@ def reformat_number(number):
 
 
 def convert_datetime(time, year=True):
+    # Конвертируем дату в читаемый формат
     month = {'01': 'января', '02': 'февраля', '03': 'марта', '04': 'апреля', '05': 'мая', '06': 'июня',
              '07': 'июля', '08': 'августа', '09': 'сентября', '10': 'октября', '11': 'ноября', '12': 'декабря'}
     date = str(time).split()[0].split('-')
@@ -64,6 +66,7 @@ def convert_datetime(time, year=True):
 
 
 def order_stage(stage):
+    # Стадия заказа
     st = {0: 'Собираем заказ', 1: 'Подготовлен к отгрузке', 2: 'В пути', 3: 'Курьер направляется к вам',
           4: 'Заказ доставлен'}
     for i in st:

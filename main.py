@@ -29,10 +29,11 @@ app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-admins = {
+load_dotenv()  # Для отправки писем на почту
+
+admins = {  # Админы данного сайта, их id и почта
     1: 'kepka9687@gmail.com'
 }
-load_dotenv()  # Для отправки писем на почту
 
 
 # Главная страница
@@ -49,7 +50,7 @@ def index():
 
 # Страница, где пользователь ищет продукты
 @app.route('/search/<string:request>', methods=['GET', 'POST'])
-def search(request):
+def search(req):
     form = FindForm()
     if form.validate_on_submit():
         return redirect(f'/search/{form.find.data}')
@@ -58,7 +59,7 @@ def search(request):
     found_prod = []
     for item in prod:
         # item - все продукты в магазине
-        for item2 in request.lower().split():
+        for item2 in req.lower().split():
             # item2 - слова в запросе пользователя
             if item.name.lower().find(item2) == -1:  # Если ничего не нашел в запросе,
                 new = transliterate(item2)  # то вдруг пользователь не поменял раскладку и переделываем запрос
@@ -67,7 +68,7 @@ def search(request):
             else:
                 found_prod.append(item)
     return render_template("search.html", prod=found_prod, prod2=prod, is_active1='active', form=form,
-                           request=request, admins=admins)
+                           request=req, admins=admins)
 
 
 # Страница продукта
@@ -222,11 +223,12 @@ def profile():
             profileImg = f'img/profile_img/{user.name}{user.id}.jpg'
         if form.is_submitted():
             phone_number = reformat_number(form.phone_number.data)
-            if not phone_number:
+            if not phone_number:  # Если записан неправильный формат телефона
                 return render_template("profile.html", is_active3='active', form=form, user=user,
                                        message=True, admins=admins, convert_datetime=convert_datetime,
                                        profileImg=url_for('static', filename=profileImg))
             else:
+                # Изменяем информацию о пользователе в профиле
                 image = request.files['profile_photo']
                 binary_image = None
                 if image.filename != '':
@@ -262,6 +264,7 @@ def view_basket():
         return render_template("profile.html", is_active2='active', admins=admins)
 
 
+# Показываем заказы пользователя
 @app.route('/my_orders', methods=["GET", "POST"])
 def my_orders():
     db_sess = db_session.create_session()
@@ -270,6 +273,7 @@ def my_orders():
                            orders=data, db_sess=db_sess, Product=Product, order_stage=order_stage)
 
 
+# Страница приобретённых товаров
 @app.route('/purchased', methods=["GET", "POST"])
 def purchased():
     db_sess = db_session.create_session()
@@ -308,6 +312,7 @@ def delete_item_from_basket(id, where):
         return redirect("/buyprod/basket/0")
 
 
+# Главная
 @app.route('/main', methods=["GET", "POST"])
 def main():
     db_session.global_init("db/shop.db")
@@ -332,6 +337,7 @@ def logout():
     return redirect("/")
 
 
+# Переменные для страницы /register
 cod = 000000
 datas = []
 
@@ -343,7 +349,7 @@ def register():
     form = RegisterForm()
     form2 = RegisterEmail()
     db_sess = db_session.create_session()
-    if form.submit.data and form.validate():
+    if form.submit.data and form.validate():  # Регистрация и проверка почты
         cod = random.randrange(100000, 999999)
         if form.password.data != form.password_again.data:
             return render_template('register.html', title='Регистрация',
@@ -363,7 +369,7 @@ def register():
                                message='Не удалось отправить письмо на почту')
 
     if form2.submit2.data and form2.validate():
-        if form2.code.data == cod:
+        if form2.code.data == cod:  # Проверка кода с почты
             user = User(
                 name=datas[0],
                 surname=datas[1],
