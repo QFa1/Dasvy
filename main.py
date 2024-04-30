@@ -50,7 +50,7 @@ def index():
 
 # Страница, где пользователь ищет продукты
 @app.route('/search/<string:request>', methods=['GET', 'POST'])
-def search(req):
+def search(request):
     form = FindForm()
     if form.validate_on_submit():
         return redirect(f'/search/{form.find.data}')
@@ -59,7 +59,7 @@ def search(req):
     found_prod = []
     for item in prod:
         # item - все продукты в магазине
-        for item2 in req.lower().split():
+        for item2 in request.lower().split():
             # item2 - слова в запросе пользователя
             if item.name.lower().find(item2) == -1:  # Если ничего не нашел в запросе,
                 new = transliterate(item2)  # то вдруг пользователь не поменял раскладку и переделываем запрос
@@ -68,7 +68,7 @@ def search(req):
             else:
                 found_prod.append(item)
     return render_template("search.html", prod=found_prod, prod2=prod, is_active1='active', form=form,
-                           request=req, admins=admins)
+                           request=request, admins=admins)
 
 
 # Страница продукта
@@ -117,6 +117,7 @@ def product(prod_id):
         )
         db_sess.add(comment)
         db_sess.commit()
+        db_sess.close()
         return redirect(f'/product/{prod_id}')
     return render_template("product.html", prod=prod, img_prod=img_prod, is_active1='active', os=os,
                            write_to_file=write_to_file, all_img=img, first_img=list(img.keys())[0],
@@ -141,6 +142,7 @@ def buy_products(item, prod_id):
         if form.validate_on_submit():
             phone_number = reformat_number(form.phone_number.data)
             if not phone_number:
+                db_sess.close()
                 return render_template("buy_products.html", basket=basket, is_active2='active',
                                        form=form, user=user, message=True, where=item, admins=admins)
             else:
@@ -163,6 +165,7 @@ def buy_products(item, prod_id):
                 )
                 db_sess.add(order)
                 db_sess.commit()
+                db_sess.close()
                 return render_template("pay.html", is_active2='active', order_id=order.id, where=item)
         return render_template("buy_products.html", basket=basket, is_active2='active',
                                form=form, user=user, where=item, admins=admins)
@@ -176,13 +179,13 @@ def thanks(where, order_id):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.id == current_user.id).first()
     db_sess.query(Order).filter(Order.id == order_id).update({'payment': 'cash', 'is_ordered': True})
-
     if where == 'basket':  # Если пользователь заказывал с корзины, то удаляем из корзины продукты, которые он заказал
         order = db_sess.query(Order).filter(Order.id == order_id).first()
         basket = db_sess.query(Basket).filter(Basket.user_id == current_user.id).first()
         for j in [i for i in order.product_ides.split(';') if i]:
             basket.products.remove(db_sess.query(Product).filter(Product.id == int(j)).first())
     db_sess.commit()
+    db_sess.close()
     return render_template("thanks.html", is_active2='active', user=user, admins=admins)
 
 
@@ -224,6 +227,7 @@ def profile():
         if form.is_submitted():
             phone_number = reformat_number(form.phone_number.data)
             if not phone_number:  # Если записан неправильный формат телефона
+                db_sess.close()
                 return render_template("profile.html", is_active3='active', form=form, user=user,
                                        message=True, admins=admins, convert_datetime=convert_datetime,
                                        profileImg=url_for('static', filename=profileImg))
@@ -245,6 +249,7 @@ def profile():
                      'flat': form.flat.data,
                      'photo': binary_image})
                 db_sess.commit()
+                db_sess.close()
         return render_template("profile.html", user=user, is_active3='active', admins=admins,
                                profileImg=url_for('static', filename=profileImg),
                                convert_datetime=convert_datetime, form=form)
@@ -291,6 +296,7 @@ def buy(id, bull):
         basket = db_sess.query(Basket).filter(Basket.user_id == current_user.id).first()
         basket.products.append(product)
         db_sess.commit()
+        db_sess.close()
         if bull == 'True':
             return redirect(f"/product/{id}")
         return redirect("/#win1")
@@ -306,6 +312,7 @@ def delete_item_from_basket(id, where):
     basket = db_sess.query(Basket).filter(Basket.user_id == current_user.id).first()
     basket.products.remove(product)
     db_sess.commit()
+    db_sess.close()
     if where == 0:
         return redirect("/view_basket")
     if where == 1:
@@ -385,6 +392,7 @@ def register():
             )
             db_sess.add(basket)
             db_sess.commit()
+            db_sess.close()
             return redirect('/login')
         else:
             return render_template('register.html', title='Registration', form=form, is_active1='active',
@@ -467,7 +475,7 @@ def add_product():
             )
             db_sess.add(prod_images)
             db_sess.commit()
-
+            db_sess.close()
             for image in images:
                 if image.filename != '':
                     os.remove(os.path.join(UPLOADS_PATH, secure_filename(image.filename)))
@@ -483,6 +491,7 @@ def delete_item(id):
         product = db_sess.query(Product).filter(Product.id == id).first()
         db_sess.delete(product)
         db_sess.commit()
+        db_sess.close()
         return redirect("/")
 
 
@@ -494,6 +503,7 @@ def delete_comment(id_comment, prod_id):
         comment = db_sess.query(Comments).filter(Comments.id == id_comment).first()
         db_sess.delete(comment)
         db_sess.commit()
+        db_sess.close()
         return redirect(f"/product/{prod_id}")
 
 
@@ -522,6 +532,7 @@ def take_order(order_id):
                                                                   'who_ordered': f'{admin.name} {admin.surname}',
                                                                   'stage': 1})
         db_sess.commit()
+        db_sess.close()
         return redirect('/orders/1')
 
 
@@ -534,6 +545,7 @@ def not_take_order(order_id):
                                                                   'who_ordered': None,
                                                                   'stage': 0})
         db_sess.commit()
+        db_sess.close()
         return redirect('/orders/1')
 
 
@@ -544,6 +556,7 @@ def change_stage(stage, order_id):
         db_sess = db_session.create_session()
         db_sess.query(Order).filter(Order.id == order_id).update({'stage': stage})
         db_sess.commit()
+        db_sess.close()
         return redirect('/orders/4')
 
 
@@ -555,6 +568,7 @@ def order_complete(order_id):
         db_sess.query(Order).filter(Order.id == order_id).update({'is_ordered': False, 'is_paid': True,
                                                                   'should_be_delivered': datetime.datetime.now()})
         db_sess.commit()
+        db_sess.close()
         return redirect('/orders/4')
 
 
