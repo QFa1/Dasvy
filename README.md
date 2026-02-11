@@ -1,3 +1,5 @@
+Illustrations in the "Dasvy.pptx" presentation
+
 Dasvy is a unique online store specializing in selling original gifts for various occasions and holidays.
 
 The project implements: 
